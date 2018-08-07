@@ -1,8 +1,43 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
+<div class="ui inverted vertical masthead center aligned segment">
+    <div class="ui container">
+        <div class="ui large secondary inverted pointing menu">
+            <a class="toc item">
+                <i class="sidebar icon"></i>
+            </a>
+            <a href="{{ url_for('index') }}" class="active item">Trang chủ</a>
+            <a class="item">Dòng thời gian</a>
+            <a class="item">Chính phủ</a>
+            <a class="item">Nhân vật</a>
+            <div class="right item">
+                {% if current_user.is_anonymous %}
+                <a href="{{ url_for('login') }}" class="ui inverted blue button">Đăng nhập</a>
+                {% else %}
 
-{% block content %}
-    <h1>Hi, {{ user.username }}!</h1>
-    {% for post in posts %}
-    <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
-    {% endfor %}
-{% endblock %}
+                <a href="{{ url_for('user', username=current_user.username) }}" class="ui inverted green button">Trang cá nhân</a>
+                <a href="{{ url_for('logout') }}" class="ui inverted red button">Đăng xuất</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="ui text container">
+        <h1 class="ui inverted header">
+            Lê sơ tản văn
+        </h1>
+        <h2>Đây là trang web về triều Lê sơ trong lịch sử Việt Nam</h2>
+        <div class="ui huge primary button">Bắt đầu nào!!
+            <i class="right arrow icon"></i>
+        </div>
+    </div>
+
+</div>
+
+<h1>Hi, {{ current_user.username }}!</h1>
+{% for post in posts %}
+<div>
+    <p>{{ post.author.username }} says:
+        <b>{{ post.body }}</b>
+    </p>
+</div>
+{% endfor %} {% endblock %}
