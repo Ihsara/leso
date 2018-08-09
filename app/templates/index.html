@@ -1,24 +1,27 @@
 {% extends "base.html" %} {% block content %}
 <div class="ui inverted vertical masthead center aligned segment">
     <div class="ui container">
-        <div class="ui large secondary inverted pointing menu">
-            <a class="toc item">
-                <i class="sidebar icon"></i>
-            </a>
-            <a href="{{ url_for('index') }}" class="active item">Trang chủ</a>
-            <a class="item">Dòng thời gian</a>
-            <a class="item">Chính phủ</a>
-            <a class="item">Nhân vật</a>
-            <div class="right item">
-                {% if current_user.is_anonymous %}
-                <a href="{{ url_for('login') }}" class="ui inverted blue button">Đăng nhập</a>
-                {% else %}
+        <div class="ui fixed large inverted main menu" style="display: flex !important;">
+            <div class="ui container">
+                <a class="toc item">
+                        <i class="sidebar icon"></i>
+                    </a>
+                    <a href="{{ url_for('index') }}" class="active item">Trang chủ</a>
+                    <a class="item">Dòng thời gian</a>
+                    <a class="item">Chính phủ</a>
+                    <a class="item">Nhân vật</a>
+                    <div class="right item">
+                        {% if current_user.is_anonymous %}
+                        <a href="{{ url_for('login') }}" class="ui inverted blue button">Đăng nhập</a>
+                        {% else %}
 
-                <a href="{{ url_for('explore') }}" class="ui inverted purple button">Cập nhật</a>
-                <a href="{{ url_for('user', username=current_user.username) }}" class="ui inverted green button">Trang cá nhân</a>
-                <a href="{{ url_for('logout') }}" class="ui inverted red button">Đăng xuất</a>
-                {% endif %}
+                        <a href="{{ url_for('explore') }}" class="ui inverted purple button">Cập nhật</a>
+                        <a href="{{ url_for('user', username=current_user.username) }}" class="ui inverted green button">Trang cá nhân</a>
+                        <a href="{{ url_for('logout') }}" class="ui inverted red button">Đăng xuất</a>
+                        {% endif %}
+                    </div>
             </div>
+
         </div>
     </div>
 
@@ -33,28 +36,49 @@
     </div>
 
 </div>
+<div class="ui vertical stripe segment">
+        <div class="ui middle aligned stackable grid container">
+            <div class="row">
+                <div class="eight wide column">
+                    <h3 class="ui header">Xin chào, {{ current_user.username }}! </h3>
+                    {% if form %}
+                    <form class="ui form" action="" method="post">
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.post.label }}<br>
+                            {{ form.post(cols=32, rows=4) }}<br>
+                            {% for error in form.post.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </p>
+                        <div class="center aligned column">
+                                {{ form.submit(class="ui violet basic huge button", placeholder="Đăng bài") }}
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            <div class="six wide right floated column">
+                <img src="static/photo/flower.png" class="ui large bordered rounded image">
+            </div>
+            </div>
+            <div class="row">
+                <div class="center aligned column">
+                    {% for post in posts %}
+                        {% include '_post.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="center aligned column">
+                    {% if prev_url %}
+                    <a class="ui huge button" href="{{ prev_url }}">Cũ hơn</a>
+                    {% endif %}
+                    {% if next_url %}
+                    <a class="ui huge button" href="{{ next_url }}">Mới hơn</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        </div>
 
-    <h1>Hi, {{ current_user.username }}!</h1>
-    {% if form %}
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.post.label }}<br>
-            {{ form.post(cols=32, rows=4) }}<br>
-            {% for error in form.post.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
-    {% endif %}
-    {% for post in posts %}
-        {% include '_post.html' %}
-    {% endfor %}
-    {% if prev_url %}
-    <a href="{{ prev_url }}">Newer posts</a>
-    {% endif %}
-    {% if next_url %}
-    <a href="{{ next_url }}">Older posts</a>
-    {% endif %}
 {% endblock %}
