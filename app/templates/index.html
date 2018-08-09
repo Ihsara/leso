@@ -14,7 +14,7 @@
                 <a href="{{ url_for('login') }}" class="ui inverted blue button">Đăng nhập</a>
                 {% else %}
 
-                <a href="{{ url_for('explore') }}" class="ui inverted purple button">Đăng xuất</a>
+                <a href="{{ url_for('explore') }}" class="ui inverted purple button">Cập nhật</a>
                 <a href="{{ url_for('user', username=current_user.username) }}" class="ui inverted green button">Trang cá nhân</a>
                 <a href="{{ url_for('logout') }}" class="ui inverted red button">Đăng xuất</a>
                 {% endif %}
@@ -47,6 +47,7 @@
         </p>
         <p>{{ form.submit() }}</p>
     </form>
+    {% endif %}
     {% for post in posts %}
         {% include '_post.html' %}
     {% endfor %}
@@ -56,4 +57,4 @@
     {% if next_url %}
     <a href="{{ next_url }}">Older posts</a>
     {% endif %}
-{% endfor %} {% endblock %}
+{% endblock %}

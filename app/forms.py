@@ -5,17 +5,17 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Le
 from app.models import User
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Remember Me')
-    submit = SubmitField('Sign In')
+    username = StringField('Tên tài khoản', validators=[DataRequired()])
+    password = PasswordField('Mật khẩu', validators=[DataRequired()])
+    remember_me = BooleanField('Ghi nhớ tôi')
+    submit = SubmitField('Đăng nhập')
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField('Tên tài khoản', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Mật khẩu', validators=[DataRequired()])
     password2 = PasswordField(
-        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+        'Lặp lại mật khẩu', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -29,9 +29,9 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Mời bạn chọn địa chỉ email khác!')
 
 class EditProfileForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
-    submit = SubmitField('Submit')
+    username = StringField('Tên tài khoản', validators=[DataRequired()])
+    about_me = TextAreaField('Về tôi', validators=[Length(min=0, max=140)])
+    submit = SubmitField('Đăng')
 
     def __init__(self, original_username, *args, **kwargs):
         super(EditProfileForm, self).__init__(*args, **kwargs)
@@ -40,9 +40,19 @@ class EditProfileForm(FlaskForm):
         if username.data != self.original_username:
             user = User.query.filter_by(username=self.username.data).first()
             if user is not None:
-                raise ValidationError('Please use a different username.')
+                raise ValidationError('Mời bạn hãy chọn tên tài khoản khác.')
 
 class PostForm(FlaskForm):
-    post = TextAreaField('Say something', validators=[
+    post = TextAreaField('Đăng gì đó nào!', validators=[
         DataRequired(), Length(min=1, max=140)])
-    submit = SubmitField('Submit')
+    submit = SubmitField('Đăng bài')
+
+class ResetPasswordRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Yêu cầu email hướng dẫn cài đặt lại mật khẩu')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Mật khẩu mới', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Cài đặt lại mật khẩu')

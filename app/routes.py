@@ -4,11 +4,14 @@ from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
+from time import time
+
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import PostForm
 from app.models import Post
 from app.models import User
+from app.email import send_password_reset_email
 
 @app.before_request
 def before_request():
@@ -70,9 +73,9 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        flash('Chúng tôi đã ghi nhận mẫu đăng kí của bạn!')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', title='Đăng ký', form=form)
 
 @app.route('/user/<username>')
 @login_required
@@ -85,7 +88,7 @@ def user(username):
         if posts.has_next else None
     prev_url = url_for('user', username=user.username, page=posts.prev_num) \
         if posts.has_prev else None
-    return render_template('user.html', user=user, posts=posts.items,
+    return render_template('user.html', user=user, posts=posts.items, title='{}- Lê sơ tản văn'.format(user.username),
                            next_url=next_url, prev_url=prev_url)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -96,26 +99,26 @@ def edit_profile():
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         db.session.commit()
-        flash('Your changes have been saved.')
+        flash('Những thay đổi của bạn đã đoực lưu lại')
         return redirect(url_for('edit_profile'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
-    return render_template('edit_profile.html', title='Edit Profile', form=form)
+    return render_template('edit_profile.html', title='Chỉnh sửa hồ sơ tài khoản', form=form)
 
 @app.route('/follow/<username>')
 @login_required
 def follow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
-        flash('User {} not found.'.format(username))
+        flash('Không kiếm thấy người dùng {}.'.format(username))
         return redirect(url_for('index'))
     if user == current_user:
-        flash('You cannot follow yourself!')
+        flash('Bạn không thể theo dõi chính mình!')
         return redirect(url_for('user', username=username))
     current_user.follow(user)
     db.session.commit()
-    flash('You are following {}!'.format(username))
+    flash('Bạn hiện đang theo dõi người dùng {}!'.format(username))
     return redirect(url_for('user', username=username))
 
 @app.route('/unfollow/<username>')
@@ -126,11 +129,11 @@ def unfollow(username):
         flash('User {} not found.'.format(username))
         return redirect(url_for('index'))
     if user == current_user:
-        flash('You cannot unfollow yourself!')
+        flash('Bạn không thể theo dõi chính mình!')
         return redirect(url_for('user', username=username))
     current_user.unfollow(user)
     db.session.commit()
-    flash('You are not following {}.'.format(username))
+    flash('Bạn hiện không theo dõi người dùng {}.'.format(username))
     return redirect(url_for('user', username=username))
 
 @app.route('/explore')
@@ -145,3 +148,32 @@ def explore():
         if posts.has_prev else None
     return render_template("index.html", title='Khám phá', posts=posts.items,
                             next_url=next_url, prev_url=prev_url)
+
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash('Hãy kiểm tra trong hộp thư của bạn email hướng dẫn chỉnh lại mật khẩu')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html',
+                           title='Reset Password', form=form)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    user = User.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Mật khẩu của bạn đã được cài đặt lại!!')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)

@@ -23,11 +23,14 @@
                     </div>
                 </div>
                 {{ form.submit(class="ui fluid large teal submit button", placeholder="Đăng nhập") }}
-                <div class="ui fluid large red submit button"><a href="{{ url_for('register') }}">Đăng ký</a></div>
             </div>
 
             <div class="ui message">
-                    Chỉ dùng biện pháp này khi tài khoảng không chạy <a href="{{ url_for('register') }}">Đăng ký</a>
+                    Chỉ dùng biện pháp này khi tài khoản không chạy <a href="{{ url_for('register') }}">Đăng ký</a>
+            </div>
+            <div class="ui message">
+                Quên mật khẩu?
+                <a href="{{ url_for('reset_password_request') }}">Nhấn vào đây để khôi phục</a>
             </div>
 
             <div class="ui error message">
