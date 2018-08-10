@@ -147,7 +147,7 @@ def explore():
     prev_url = url_for('explore', page=posts.prev_num) \
         if posts.has_prev else None
     return render_template("index.html", title='Khám phá', posts=posts.items,
-                            next_url=next_url, prev_url=prev_url)
+                            link_css='/static/css/index.css', next_url=next_url, prev_url=prev_url)
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():

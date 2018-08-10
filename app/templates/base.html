@@ -1,37 +1,54 @@
-<html>
+{% extends 'bootstrap/base.html' %}
 
-<head>
-  {% if title %}
-  <title>{{ title }}</title>
-  {% else %}
-  <title>Lê sơ tản văn</title>
-  {% endif %}
-  <meta charset="UTF-8">
-  <meta name="author" content="Đồng tác giả bởi Trần Thị Kim Trang và Trần Long Châu">
-  <meta name="keywords" content="history, Vietnam, Lê, lịch sử, Việt Nam">
-  <meta name="description" content="Nơi lưu lại những án tản văn về thời Lê sơ">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel='shortcut icon' type='image/x-icon' href='/static/photo/favicon.ico' />
-  <link rel="stylesheet" href="/static/semantic/dist/semantic.min.css">
-  <!-- <link rel="stylesheet" href="/static/css/index.css"> -->
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-    crossorigin="anonymous"></script>
-  <script src="/static/semantic/dist/semantic.min.js"></script>
+{% block title %}
+    {% if title %}{{ title }} - Lê sơ tản văn{% else %}Lê sơ tản văn{% endif %}
+{% endblock %}
 
-  {% if link_css %}
-  <link rel="stylesheet" href={{ link_css }}> {% endif %}
+{% block head %}
+{{super()}}
+<meta charset="UTF-8">
+<meta name="author" content="Đồng tác giả bởi Trần Thị Kim Trang và Trần Long Châu">
+<meta name="keywords" content="history, Vietnam, Lê, lịch sử, Việt Nam">
+<meta name="description" content="Nơi lưu lại những án tản văn về thời Lê sơ">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel='shortcut icon' type='image/x-icon' href='/static/photo/favicon.ico' />
+{% endblock %}
 
-</head>
+{% block styles %}
+{{super()}}
+<link rel="stylesheet"
+      href="{{url_for('.static', filename='mystyle.css')}}">
+<link rel="stylesheet"
+      href="/static/semantic/dist/semantic.min.css">
 
-<body>
-  {% with messages = get_flashed_messages() %} {% if messages %}
-  <ul>
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %} {% endwith %} {% block content %}{% endblock %}
-  <div class="ui inverted vertical footer segment">
+    {% if link_css %}
+    <link rel="stylesheet" href={{ link_css }}> {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+crossorigin="anonymous"></script>
+<script src="/static/semantic/dist/semantic.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
+{%- block footer %}
+<footer class="ui inverted vertical footer segment">
     <div class="ui container">
       <div class="ui stackable inverted divided equal height stackable grid">
         <div class="three wide column">
@@ -58,11 +75,11 @@
           </p>
           <p>Trang web được thiết lập bởi
             <a href="https://github.com/Ihsara">Trần Long Châu</a>
+
           </p>
         </div>
       </div>
     </div>
-  </div>
-</body>
-
-</html>
+</footer>
+{%- endblock footer %}
+{% endblock %}
