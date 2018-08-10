@@ -177,3 +177,19 @@ def reset_password(token):
         flash('Mật khẩu của bạn đã được cài đặt lại!!')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
+
+@app.route('/tan_van', methods=['GET', 'POST'])
+def tan_van():
+    return render_template('/main_pages/tanvan.html', link="/static/css/tanvan.css", title="Tản văn")
+
+@app.route('/dong_thoi_gian', methods=['GET', 'POST'])
+def dong_thoi_gian():
+    return render_template('/main_pages/timeline.html', link="/static/css/timeline.css", title="Dòng thời gian")
+
+@app.route('/trieu_dinh_le_so', methods=['GET', 'POST'])
+def trieu_dinh_le_so():
+    return render_template('/main_pages/leso_gov.html', link="/static/css/leso_gov.css", title="Triều đình Lê sơ")
+
+@app.route('/nhan_vat_tieu_bieu', methods=['GET', 'POST'])
+def nhan_vat_tieu_bieu():
+    return render_template('/main_pages/FamousFigures.html', link="/static/css/FamousFigues.css", title="Nhân vật tiêu biểu")
