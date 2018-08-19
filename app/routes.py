@@ -9,7 +9,7 @@ from time import time
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import PostForm
-from app.models import Post
+from app.models import Post, NewPost
 from app.models import User
 from app.email import send_password_reset_email
 
@@ -146,7 +146,7 @@ def explore():
         if posts.has_next else None
     prev_url = url_for('explore', page=posts.prev_num) \
         if posts.has_prev else None
-    return render_template("index.html", title='Khám phá', posts=posts.items,
+    return render_template("index.html", title='Khám phá', posts=posts.items, #link_js='/static/js/summernote.js',
                             link_css='/static/css/index.css', next_url=next_url, prev_url=prev_url)
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
@@ -193,3 +193,37 @@ def trieu_dinh_le_so():
 @app.route('/nhan_vat_tieu_bieu', methods=['GET', 'POST'])
 def nhan_vat_tieu_bieu():
     return render_template('/main_pages/FamousFigures.html', link="/static/css/FamousFigues.css", title="Nhân vật tiêu biểu")
+
+@app.route('/post_article', methods=['GET', 'POST'])
+def post_article():
+    var1= var2 = "Nothing new"
+    if request.method == 'POST':
+        print('Something is posted!!!!')
+        var1 = request.get_json()
+        post = NewPost(body=request.get_json(), author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        print('{}: {}'.format('var1', var1) )
+        return render_template('/admin/post_article.html')
+
+    page = request.args.get('page', 1, type=int)
+    posts = current_user.followed_thrown_away_posts().paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('index', page=posts.next_num) \
+        if posts.has_next else None
+    prev_url = url_for('index', page=posts.prev_num) \
+        if posts.has_prev else None
+
+    return render_template('/admin/post_article.html', link="/static/css/admin/post_article.css",
+                            link_js='/static/js/admin/post_article.js', title="Đăng bài",
+                            posts=posts.items, next_url=next_url,
+                           prev_url=prev_url )
+
+@app.route('/test_post', methods=['GET','POST'])
+def test_post():
+    names = 'None here!!'
+    if request.method == 'POST':
+        names = request.get_json()
+        for name in names:
+            print (name)
+    return render_template('/admin/test_post.html', title="Test post", place1=names, place2=names)

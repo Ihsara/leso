@@ -27,6 +27,7 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    test_posts = db.relationship('NewPost', backref='author', lazy='dynamic')
     followed = db.relationship(
         'User', secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -65,6 +66,10 @@ class User(UserMixin, db.Model):
         own = Post.query.filter_by(user_id=self.id)
         return followed.union(own).order_by(Post.timestamp.desc())
 
+    def followed_thrown_away_posts(self):
+        own = NewPost.query.filter_by(user_id=self.id)
+        return own.order_by(NewPost.timestamp.desc())
+
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
@@ -97,4 +102,11 @@ class Catergory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name=db.Column(db.String(64), index=True, unique=True)
     posts = db.relationship('Post', backref='catergory', lazy=True)
+
+class NewPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name= db.Column(db.String(64), index=True, unique=True)
+    body= db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id') )
 

@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block app_content %}
+
+<div class="ui masthead vertical stripe segment">
+    <p>{{ place1 }} </p>
+</div>
+<div class="ui masthead vertical stripe segment">
+    <p>{{ place2 }} </p>
+</div>
+
+<div class="ui masthead vertical stripe segment">
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" />
+
+        <div id='TextBoxesGroup'>
+        <div id="TextBoxDiv1">
+            <label>Name #1 : </label><input type='textbox' id='textbox1' name ='mytext'>
+        </div>
+        </div>
+        <input type='button' value='Add Name' id='addButton'>
+        <input type='button' value='Remove Name' id='removeButton'>
+
+        <input type="submit" value="Submit" id='submit'>
+    </form>
+</div>
+
+
+{% block scripts %}
+{{super()}}
+<script type="text/javascript">boxes();</script>
+{% endblock %} {% endblock %}
