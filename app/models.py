@@ -14,9 +14,21 @@ from flask_login import UserMixin
 from app import db
 from app import login
 
+
 followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
+
+
+multiMediaUsed = db.Table('multi_media_used',
+    db.Column('article_id', db.Integer, db.ForeignKey('new_post.id'), primary_key=True),
+    db.Column('multimedia_id', db.Integer, db.ForeignKey('multi_media.id'), primary_key=True)
+)
+
+tags = db.Table('tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+    db.Column('article_id', db.Integer, db.ForeignKey('new_post.id'), primary_key=True)
 )
 
 class User(UserMixin, db.Model):
@@ -26,8 +38,13 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+
     posts = db.relationship('Post', backref='author', lazy='dynamic')
-    test_posts = db.relationship('NewPost', backref='author', lazy='dynamic')
+
+    comment = db.relationship('Comment', backref='author', lazy='dynamic')
+
+    #Extra parts for customized contents
+
     followed = db.relationship(
         'User', secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -70,6 +87,10 @@ class User(UserMixin, db.Model):
         own = NewPost.query.filter_by(user_id=self.id)
         return own.order_by(NewPost.timestamp.desc())
 
+    def comments_commented(self):
+        own = Comemnt.query.filter_by(user_id=self.id)
+        return own.order_by(Comment.timestamp.desc())
+
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
@@ -88,20 +109,34 @@ class User(UserMixin, db.Model):
 def load_user(id):
     return User.query.get(int(id))
 
+
+
+class Editor(User):
+    editor_right = db.Column(db.Integer, default=1)#Remember to switch it back later !!!
+    test_posts = db.relationship('NewPost', backref='author', lazy='dynamic')
+
+    def followed_thrown_away_posts(self):
+        own = NewPost.query.filter_by(user_id=self.id)
+        return own.order_by(NewPost.timestamp.desc())
+
+    def __repr__(self):
+        return '<Editor {}>'.format(self.name)
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140000))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), )
-    cat_id = db.Column(db.Integer, db.ForeignKey('catergory.id'))
-
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id') )
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
-class Catergory(db.Model):
+
+class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name=db.Column(db.String(64), index=True, unique=True)
-    posts = db.relationship('Post', backref='catergory', lazy=True)
+    name = db.Column(db.String(50), nullable=False)
+
+    def __repr__(self):
+        return '<Category %r>' % self.name
 
 class NewPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -109,4 +144,54 @@ class NewPost(db.Model):
     body= db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id') )
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'),
+        nullable=False)
+    category = db.relationship('Category',
+        backref=db.backref('articles', lazy=True))
+    synopsis = db.Column(db.String(128))
+    tags = db.relationship('Tag', secondary=tags, lazy='subquery',
+        backref=db.backref('article', lazy=True))
 
+    mediaused = db.relationship('MultiMedia', secondary=multiMediaUsed, lazy='dynamic',
+        backref=db.backref('media', lazy="dynamic"))
+
+    def __repr__(self):
+        return '<NewPost {}>'.format(self.body)
+
+
+class Discussion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name= db.Column(db.String(64), index=True, unique=True)
+
+    def __repr__(self):
+        return '<Discussion {}>'.format(self.name)
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    like = db.Column(db.Integer, default=0)
+    dislike = db.Column(db.Integer, default=0)
+    timestamp =  db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.relationship('Comment', backref='commenter', lazy='dynamic')
+    discussion = comment = db.relationship('Discussion', backref='discussion', lazy='dynamic')
+
+    def __repr__(self):
+        return '<Comment {}>'.format(self.body)
+
+class MultiMedia(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    author = db.Column(db.String(128))
+    source = db.Column(db.Text)
+    source_type = db.Column(db.Text)
+    data_retrive= db.Column(db.DateTime, index=True)
+    link = db.Column(db.Text)
+
+    def __repr__(self):
+        return '<Multimedia {}>'.format(self.id)
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True, nullable=False)
+
+    def __repr__(self):
+        return '<NewPost {}>'.format(self.name)
