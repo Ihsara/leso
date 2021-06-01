@@ -40,7 +40,7 @@ SQLAlchemy==1.2.10
 stevedore==1.29.0
 typed-ast==1.1.0
 typing==3.6.4
-urllib3==1.23
+urllib3==1.26.5
 virtualenv==16.0.0
 virtualenv-clone==0.3.0
 virtualenvwrapper==4.8.2
